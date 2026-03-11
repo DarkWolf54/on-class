@@ -1,0 +1,21 @@
+server:
+  port: 9099
+
+spring:
+  application:
+    name: on-class
+
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5434/on-class-db
+    username: postgres
+    password: password
+
+  liquibase:
+    url: jdbc:postgresql://localhost:5434/on-class-db
+    user: postgres
+    password: password
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.xml
+
+  webflux:
+    base-path: /on-class
