@@ -2,6 +2,7 @@ package com.training.on_class.infrastructure.entrypoints.rest.controller;
 
 import com.training.on_class.domain.ports.inbound.ITechnologyServicePort;
 import com.training.on_class.infrastructure.entrypoints.rest.dto.request.TechnologyRequest;
+import com.training.on_class.infrastructure.entrypoints.rest.dto.response.ErrorResponse;
 import com.training.on_class.infrastructure.entrypoints.rest.dto.response.SuccessResponse;
 import com.training.on_class.infrastructure.entrypoints.rest.dto.response.TechnologyResponse;
 import com.training.on_class.infrastructure.entrypoints.rest.mapper.ITechnologyRestMapper;
@@ -32,11 +33,13 @@ public class TechnologyController {
       @ApiResponse(responseCode = "201", description = "Tecnología creada exitosamente",
         content = @Content(mediaType = "application/json", schema = @Schema(implementation = SuccessResponse.class))),
       @ApiResponse(responseCode = "400", description = "Error de validación en los campos o nombre de tecnología duplicado",
-        content = @Content(mediaType = "application/json")),
+        content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
+
       @ApiResponse(responseCode = "401", description = "Usuario no autenticado",
-        content = @Content),
+        content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
+
       @ApiResponse(responseCode = "403", description = "El usuario no tiene el rol necesario (ADMIN)",
-        content = @Content)
+        content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
