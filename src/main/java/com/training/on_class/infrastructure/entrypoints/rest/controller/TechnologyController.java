@@ -4,6 +4,7 @@ import com.training.on_class.domain.ports.inbound.ITechnologyServicePort;
 import com.training.on_class.infrastructure.entrypoints.rest.dto.request.TechnologyRequest;
 import com.training.on_class.infrastructure.entrypoints.rest.dto.response.ErrorResponse;
 import com.training.on_class.infrastructure.entrypoints.rest.dto.response.SuccessResponse;
+import com.training.on_class.infrastructure.entrypoints.rest.dto.response.TechnologyBasicResponse;
 import com.training.on_class.infrastructure.entrypoints.rest.dto.response.TechnologyResponse;
 import com.training.on_class.infrastructure.entrypoints.rest.mapper.ITechnologyRestMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/technologies")
@@ -50,5 +53,28 @@ public class TechnologyController {
           .flatMap(technologyServicePort::saveTechnology)
           .map(mapper::toResponse)
           .map(dto -> new SuccessResponse<>("Tecnología creada exitosamente", dto));
+    }
+
+    @Operation(summary = "Validar existencia de múltiples tecnologías",
+      description = "Verifica si una lista de IDs de tecnologías existen en la base de datos. Usado para comunicación entre microservicios.")
+    @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Validación ejecutada con éxito",
+        content = @Content(mediaType = "application/json", schema = @Schema(implementation = SuccessResponse.class)))
+    })
+    @GetMapping("/validate")
+    public Mono<SuccessResponse<Boolean>> validateTechnologiesExist(@RequestParam List<Long> ids) {
+        return technologyServicePort.existAll(ids)
+          .map(allExist -> new SuccessResponse<>("Validación completada", allExist));
+    }
+
+    @Operation(summary = "Obtener tecnologías por IDs",
+      description = "Devuelve una lista básica (solo ID y nombre) de las tecnologías solicitadas.")
+    @GetMapping("/search")
+    public Mono<SuccessResponse<List<TechnologyBasicResponse>>> getTechnologiesByIds(@RequestParam List<Long> ids) {
+
+        return technologyServicePort.getAllByIds(ids)
+          .map(tech -> new TechnologyBasicResponse(tech.getId(), tech.getName()))
+          .collectList()
+          .map(list -> new SuccessResponse<>("Tecnologías obtenidas exitosamente", list));
     }
 }

@@ -7,7 +7,10 @@ import com.training.on_class.infrastructure.adapters.persistenceadapter.mappers.
 import com.training.on_class.infrastructure.adapters.persistenceadapter.repositories.ITechnologyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -27,5 +30,19 @@ public class TechnologyPersistenceAdapter implements ITechnologyPersistencePort 
     @Override
     public Mono<Boolean> existsByName(String name) {
         return repository.existsByName(name);
+    }
+
+    @Override
+    public Mono<Boolean> existAll(List<Long> ids) {
+        long expectedSize = ids.stream().distinct().count();
+        return repository.findAllById(ids)
+          .count()
+          .map(actualSize -> actualSize == expectedSize);
+    }
+
+    @Override
+    public Flux<Technology> findAllByIds(List<Long> ids) {
+        return repository.findAllById(ids)
+          .map(entity -> new Technology(entity.getId(), entity.getName(), entity.getDescription()));
     }
 }
